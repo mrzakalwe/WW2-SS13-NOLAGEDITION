@@ -1,0 +1,3 @@
+<h2>Welcome to <b><span style = "font-size: 1.2em;">WW2-SS13 NO LAG EDITION</span></b></h2>
+<h3>This is an <b>ALPHA</b> build of a new World War 2 server. Expect bugs. We are not up 24/7, for inquiries and admin applications please visit our <a href = "https://www.reddit.com/r/ww2ss13/">Subreddit</a> or <a href = "https://discord.gg/EZW6mU">Discord</a>.<br>
+<h3>No donations are expected currently.<br></h3>
