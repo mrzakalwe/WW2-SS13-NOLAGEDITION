@@ -23,10 +23,21 @@
 
 	..(message, alt_name = alt_name, alt_message = message_without_html)
 
-	post_say(message_without_html)
-
 	for (var/mob/living/simple_animal/complex_animal/canine/dog/D in view(world.view, src))
 		D.hear_command(message_without_html, src)
+
+	message_without_html = handle_speech_problems(message_without_html)[1]
+
+	// radio talk
+	if (!dd_hasprefix(message_without_html, ":t") || !istype(loc, /obj/tank))
+		post_say(message_without_html)
+	// tank talk
+	else if (dd_hasprefix(message_without_html, ":t") && istype(loc, /obj/tank))
+		var/obj/tank/my_tank = loc
+		if (my_tank.radio)
+			for (var/mob/living/carbon/human/H in world)
+				if (H.loc == loc)
+					H.on_hear_radio(my_tank.radio, "<span class = 'srvradio'><big><b>TANKCHAT</b>: [real_name] says, '<span class = 'notice'>[capitalize(trim_left(copytext(message_without_html, 3, length(message_without_html)+1)))]</span>'</big></span>")
 
 /mob/living/carbon/human/proc/forcesay(list/append)
 	if(stat == CONSCIOUS)

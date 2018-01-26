@@ -542,14 +542,17 @@
 						m_type = 2
 
 			if ("dab")
-				m_type = TRUE
-				if (!restrained())
-					var/mob/M = locate() in get_step(src, dir)
-					if (M)
-						message = "dabs on [M]."
-					else
+				if (config.allow_dabbing)
+					m_type = TRUE
+					if (!restrained())
 						message = "dabs."
-
+						for (var/atom/movable/AM in get_step(src, dir))
+							if (!ismob(AM))
+								if (!istype(AM, /atom/movable/lighting_overlay))
+									message = "dabs on [AM]."
+						for (var/atom/movable/AM in get_step(src, dir))
+							if (ismob(AM))
+								message = "dabs on [AM]."
 			if ("help")
 				src << {"blink, blink_r, blush, bow-(none)/mob, burp, choke, chuckle, clap, collapse, cough,
 	cry, custom, deathgasp, drool, eyebrow, frown, gasp, giggle, groan, grumble, handshake, hug-(none)/mob, glare-(none)/mob,

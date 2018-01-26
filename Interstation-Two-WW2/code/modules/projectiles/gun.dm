@@ -78,6 +78,10 @@
 
 	var/gun_type = GUN_TYPE_GENERIC
 
+	var/autofiring = FALSE
+
+	var/gibs = FALSE
+
 /obj/item/weapon/gun/New()
 	..()
 	if(!firemodes.len)
@@ -169,19 +173,21 @@
 		PreFire(A,user,params) //They're using the new gun system, locate what they're aiming at.
 		return
 
-
-	var/obj/item/weapon/gun/off_hand   //DUAL WIELDING
+	//DUAL WIELDING: only works with pistols edition
+	var/obj/item/weapon/gun/off_hand = null
 	if(ishuman(user) && user.a_intent == "harm")
 		var/mob/living/carbon/human/H = user
-		if(H.r_hand == src && istype(H.l_hand, /obj/item/weapon/gun))
-			off_hand = H.l_hand
+		if (istype(H.l_hand, /obj/item/weapon/gun/projectile/pistol))
+			if (istype(H.r_hand, /obj/item/weapon/gun/projectile/pistol))
+				if(H.r_hand == src)
+					off_hand = H.l_hand
 
-		else if(H.l_hand == src && istype(H.r_hand, /obj/item/weapon/gun))
-			off_hand = H.r_hand
+				else if(H.l_hand == src)
+					off_hand = H.r_hand
 
-		if(off_hand && off_hand.can_hit(user))
-			spawn(1)
-			off_hand.Fire(A,user,params)
+				if(off_hand && off_hand.can_hit(user))
+					spawn(1)
+					off_hand.Fire(A,user,params)
 
 	Fire(A,user,params) //Otherwise, fire normally.
 
@@ -289,6 +295,14 @@
 
 	if(!user || !target) return
 
+	// stops admemes from sending immortal dummies into combat
+	if (user)
+		if (istype(user, /mob/living/carbon/human/dummy))
+			if (user.client)
+				if (clients.len > 1)
+					user << "<span class = 'danger'>Hey you fucking meme, don't send immortal dummies into combat.</span>"
+					return
+
 	add_fingerprint(user)
 
 	if(!special_check(user))
@@ -358,10 +372,10 @@
 
 		process_accuracy(projectile, user, target, acc, disp)
 
-		if(pointblank) // oh so this is how pointblank works. Todo: delet this
+		if(pointblank)
 			if (istype(projectile, /obj/item/projectile))
 				var/obj/item/projectile/P = projectile
-				P.KD_chance *= 10
+				P.KD_chance = 100
 			process_point_blank(projectile, user, target)
 
 		if(process_projectile(projectile, user, target, user.targeted_organ, clickparams))
@@ -450,7 +464,7 @@
 		return //default behaviour only applies to true projectiles
 
 	//default point blank multiplier
-	var/damage_mult = 2
+	var/damage_mult = 1.33
 
 	//determine multiplier due to the target being grabbed
 	if(ismob(target))
@@ -521,7 +535,7 @@
 	mouthshoot = TRUE
 	M.visible_message("\red [user] sticks their gun in their mouth, ready to pull the trigger...")
 	if(!do_after(user, 15))
-		M.visible_message("\blue [user] decided life was worth living")
+		M.visible_message("\blue [user] failed to commit suicide.")
 		mouthshoot = FALSE
 		return
 	var/obj/item/projectile/in_chamber = consume_next_projectile()

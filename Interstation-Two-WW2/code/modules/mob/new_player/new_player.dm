@@ -175,23 +175,31 @@
 			src << "<span class = 'danger'>You're banned from playing.</span>"
 			return TRUE
 
+		if (!ticker.players_can_join)
+			src << "<span class = 'danger'>You can't join the game yet.</span>"
+			return TRUE
+
 		if (!reinforcements_master.is_permalocked(GERMAN))
 			if (client.prefs.s_tone < -30 && !client.untermensch)
 				usr << "<span class='danger'>You are too dark to be a German soldier.</span>"
 				return
 			reinforcements_master.add(src, GERMAN)
 		else
-			src << "<span class = 'danger'>Sorry, this side already has too many reinforcements!</span>"
+			src << "<span class = 'danger'>Sorry, this side already has too many reinforcements deployed!</span>"
 	if(href_list["re_russian"])
 
 		if (client && client.quickBan_isbanned("Playing"))
 			src << "<span class = 'danger'>You're banned from playing.</span>"
 			return TRUE
 
+		if (!ticker.players_can_join)
+			src << "<span class = 'danger'>You can't join the game yet.</span>"
+			return TRUE
+
 		if (!reinforcements_master.is_permalocked(SOVIET))
 			reinforcements_master.add(src, SOVIET)
 		else
-			src << "<span class = 'danger'>Sorry, this side already has too many reinforcements!</span>"
+			src << "<span class = 'danger'>Sorry, this side already has too many reinforcements deployed!</span>"
 	if(href_list["unre_german"])
 		reinforcements_master.remove(src, GERMAN)
 	if(href_list["unre_russian"])
@@ -201,6 +209,10 @@
 
 		if (client && client.quickBan_isbanned("Playing"))
 			src << "<span class = 'danger'>You're banned from playing.</span>"
+			return TRUE
+
+		if (!ticker.players_can_join)
+			src << "<span class = 'danger'>You can't join the game yet.</span>"
 			return TRUE
 
 		if(!ticker || ticker.current_state != GAME_STATE_PLAYING)
@@ -535,6 +547,12 @@
 			if (istype(job, /datum/job/partisan/civilian) && !civilians_toggled)
 				job_is_available = FALSE
 
+			if (istype(job, /datum/job/german) && !job.is_SS && !germans_toggled)
+				job_is_available = FALSE
+
+			if (istype(job, /datum/job/soviet) && !soviets_toggled)
+				job_is_available = FALSE
+
 			// check if the job is admin-locked or disabled codewise
 
 			if (!job.enabled)
@@ -590,9 +608,10 @@
 	dat += "</center>"
 
 	// shitcode to hide jobs that aren't available
+	var/any_available_jobs = FALSE
 	for (var/key in available_jobs_per_side)
 		var/val = available_jobs_per_side[key]
-		if (val == FALSE)
+		if (val == 0)
 			var/replaced_faction_title = FALSE
 			for (var/v in TRUE to dat.len)
 				if (findtext(dat[v], "&[key]&") && !findtext(dat[v], "&&[key]&&"))
@@ -601,6 +620,7 @@
 					dat[v] = "[replacetext(dat[v], "&&[key]&&", "")] (<span style = 'color:red'>FACTION DISABLED BY AUTOBALANCE</span>)"
 					replaced_faction_title = TRUE
 		else
+			any_available_jobs = TRUE
 			var/replaced_faction_title = FALSE
 			for (var/v in TRUE to dat.len)
 				if (findtext(dat[v], "&[key]&") && !findtext(dat[v], "&&[key]&&"))
@@ -609,6 +629,9 @@
 					dat[v] = replacetext(dat[v], "&&[key]&&", "")
 					replaced_faction_title = TRUE
 
+	if (!any_available_jobs)
+		src << "<span class = 'danger'><font size = 3>All jobs are disabled by autobalance! Please join a reinforcements queue to play.</font></span>"
+		return
 
 	var/data = ""
 	for (var/line in dat)

@@ -605,25 +605,28 @@ var/global/datum/controller/occupations/job_master
 
 
 	// too many people joined as a soldier and not enough as SL
-	// return FALSE if j is anything but a squad leader
+	// return FALSE if j is anything but a squad leader or special roles
 	proc/squad_leader_check(var/mob/new_player/np, var/datum/job/j)
+		var/current_squad = istype(j, /datum/job/german) ? current_german_squad : current_soviet_squad
 		if (!j.is_commander && !j.is_nonmilitary && !j.is_SS && !j.is_paratrooper)
 			// we're trying to join as a soldier or officer
 			if (j.is_officer) // handle officer
 				if (must_have_squad_leader(j.base_type_flag())) // only accept SLs
-					if (!istype(j, /datum/job/german/squad_leader) && !istype(j, /datum/job/soviet/squad_leader))
-						np << "<span class = 'danger'>Squad #[current_german_squad] needs a Squad Leader! You can't join as anything else until it has one. You can still spawn in through reinforcements, though.</span>"
+					if (!j.SL_check_independent)
+						np << "<span class = 'danger'>Squad #[current_squad] needs a Squad Leader! You can't join as anything else until it has one. You can still spawn in through reinforcements, though.</span>"
 						return FALSE
-					else // we're joining as the SL, chill fam
+					else // we're joining as the SL or another allowed role
 						return TRUE
 			else
 				if (must_have_squad_leader(j.base_type_flag())) // only accept SLs
-					np << "<span class = 'danger'>Squad #[current_german_squad] needs a Squad Leader! You can't join as anything else until it has one. You can still spawn in through reinforcements, though.</span>"
-					return FALSE
+					if (!j.SL_check_independent)
+						np << "<span class = 'danger'>Squad #[current_squad] needs a Squad Leader! You can't join as anything else until it has one. You can still spawn in through reinforcements, though.</span>"
+						return FALSE
 		else
 			if (must_have_squad_leader(j.base_type_flag()))
-				np << "<span class = 'danger'>Squad #[current_german_squad] needs a Squad Leader! You can't join as anything else until it has one. You can still spawn in through reinforcements, though.</span>"
-				return FALSE
+				if (!j.SL_check_independent)
+					np << "<span class = 'danger'>Squad #[current_german_squad] needs a Squad Leader! You can't join as anything else until it has one. You can still spawn in through reinforcements, though.</span>"
+					return FALSE
 		return TRUE
 
 	// too many people joined as a SL and not enough as soldier
@@ -640,8 +643,9 @@ var/global/datum/controller/occupations/job_master
 						return TRUE
 		else
 			if (must_have_squad_leader(j.base_type_flag()))
-				np << "<span class = 'danger'>Squad #[current_german_squad] needs a Squad Leader! You can't join as anything else until it has one.</span>"
-				return FALSE
+				if (!j.SL_check_independent)
+					np << "<span class = 'danger'>Squad #[current_german_squad] needs a Squad Leader! You can't join as anything else until it has one.</span>"
+					return FALSE
 		return TRUE
 
 	proc/relocate(var/mob/living/carbon/human/H)
@@ -1205,8 +1209,12 @@ var/global/datum/controller/occupations/job_master
 			job.apply_fingerprints(H)
 
 			if (names_used[H.real_name])
-				H.original_job.give_random_name(H)
+				job.give_random_name(H)
 			names_used[H.real_name] = TRUE
+
+			if (job.rank_abbreviation)
+				H.real_name = "[job.rank_abbreviation]. [H.real_name]"
+				H.name = H.real_name
 
 			switch (job.base_type_flag())
 				if (SOVIET)
@@ -1385,20 +1393,7 @@ var/global/datum/controller/occupations/job_master
 			world << "[H] ([rank]) GOT TO before spawnID()"
 			#endif
 
-			/* if its night give H a lantern
-			 * use our belt slot since keys can go in the ID slot
-			 * some roles have stuff in their belt slot but most people
-			 * will get lanterns - Kachnov */
-
-			if (isDarkOutside())
-				H.equip_to_slot_or_del(new/obj/item/device/flashlight(H), slot_belt)
-
 			spawnKeys(H, rank, alt_title)
-
-			// free belt slot, give us a flashlight anyway
-			if (!slot_belt)
-				H.equip_to_slot_or_del(new/obj/item/device/flashlight(H), slot_belt)
-
 
 			#ifdef SPAWNLOC_DEBUG
 			world << "[H] ([rank]) GOT TO after spawnID()"
@@ -1450,20 +1445,10 @@ var/global/datum/controller/occupations/job_master
 
 		var/obj/item/weapon/storage/belt/keychain/keychain = new/obj/item/weapon/storage/belt/keychain()
 
+		if (!H.wear_id) // first, try to equip it to their ID slot
+			H.equip_to_slot_or_del(keychain, slot_wear_id)
 		if (!H.belt) // first, try to equip it as their belt
 			H.equip_to_slot_or_del(keychain, slot_belt)
-		else // DISABLED because bugs
-			if (istype(H.belt, /obj/item/weapon/storage/belt) && FALSE == TRUE) // try to put it in their belt
-				var/obj/item/weapon/storage/belt/belt = H.belt
-				if (belt.can_be_inserted(keychain))
-					belt.handle_item_insertion(keychain)
-			else // then try to put it in their ID slot
-				H.equip_to_slot_if_possible(keychain, slot_wear_id)
-				if (H.wear_id != keychain) // wow
-					H.equip_to_slot_if_possible(keychain, slot_l_store)
-					if (H.l_store != keychain)
-						H.equip_to_slot_if_possible(keychain, slot_r_store)
-
 
 		var/list/keys = job.get_keys()
 
@@ -1477,16 +1462,24 @@ var/global/datum/controller/occupations/job_master
 		if(!ticker)
 			return TRUE
 		if(side == SOVIET)
+			if (soviets_forceEnabled)
+				return FALSE
 			if (side_is_hardlocked(side))
 				return 2
 			return !ticker.can_latejoin_ruforce
 		else if(side == GERMAN)
+			if (germans_forceEnabled)
+				return FALSE
 			if (side_is_hardlocked(side))
 				return 2
 			return !ticker.can_latejoin_geforce
 		else if (side == CIVILIAN)
+			if (civilians_forceEnabled)
+				return FALSE
 			return map.game_really_started()
 		else if (side == PARTISAN)
+			if (partisans_forceEnabled)
+				return FALSE
 			return map.game_really_started()
 		return FALSE
 
@@ -1504,14 +1497,22 @@ var/global/datum/controller/occupations/job_master
 
 		switch (side)
 			if (PARTISAN)
+				if (partisans_forceEnabled)
+					return FALSE
 				return FALSE
 			if (CIVILIAN)
+				if (civilians_forceEnabled)
+					return FALSE
 				return FALSE
 			if (GERMAN)
+				if (germans_forceEnabled)
+					return FALSE
 				if (player_list.len >= 2 && player_list.len <= 20)
 					if (germans >= ceil(player_list.len/2))
 						return TRUE
 			if (SOVIET)
+				if (soviets_forceEnabled)
+					return FALSE
 				if (player_list.len >= 2 && player_list.len <= 20)
 					if (soviets >= ceil(player_list.len/2))
 						return TRUE

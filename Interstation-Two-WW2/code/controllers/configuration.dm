@@ -209,6 +209,12 @@ var/list/gamemode_cache = list()
 	var/ww13_hub_hostedby
 	var/ww13_hub_postinfo
 
+	// misc
+	var/resource_website = null
+
+	// dumb memes
+	var/allow_dabbing = FALSE
+
 /datum/configuration/New()
 	var/list/L = typesof(/datum/game_mode) - /datum/game_mode
 	for (var/T in L)
@@ -260,6 +266,12 @@ var/list/gamemode_cache = list()
 						config.global_config_path = null
 					else
 						config.global_config_path = value
+
+				if ("resource_website")
+					if (!list("null", "Null", "NULL", "nil", "Nil", "NILL").Find(value))
+						config.resource_website = value
+					else
+						config.resource_website = null
 				// allows the global_config to override us with YES/NO
 				if ("hub")
 					if (!value || !list("yes", "Yes", "YES", "no", "No", "NO").Find(value))
@@ -611,6 +623,9 @@ var/list/gamemode_cache = list()
 
 				if ("round_end_countdown")
 					config.round_end_countdown = text2num(value)
+
+				if ("allow_dabbing")
+					config.allow_dabbing = TRUE
 
 				else
 					log_misc("Unknown setting in configuration: '[name]'")

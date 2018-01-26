@@ -36,11 +36,11 @@
 		for(var/organ_name in list("l_hand","r_hand","l_arm","r_arm"))
 			var/obj/item/organ/external/E = get_organ(organ_name)
 			if(!E || E.is_stump())
-				tally += 4
+				tally += 3
 			if(E.status & ORGAN_SPLINTED)
-				tally += 0.5
+				tally += 0.4
 			else if(E.status & ORGAN_BROKEN)
-				tally += 1.5
+				tally += 1.2
 	else
 		if(shoes)
 			tally += shoes.slowdown
@@ -53,6 +53,10 @@
 				tally += 0.5
 			else if(E.status & ORGAN_BROKEN)
 				tally += 1.5
+
+	var/obj/item/organ/external/E = get_organ("chest")
+	if(!E || ((E.status & ORGAN_BROKEN) && E.brute_dam > E.min_broken_damage) || (E.status & ORGAN_MUTATED))
+		tally += 4
 
 	if(shock_stage >= 10) tally += 3
 

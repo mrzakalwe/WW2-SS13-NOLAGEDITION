@@ -32,6 +32,7 @@
 /datum/job/var/is_guard = FALSE
 /datum/job/var/is_tankuser = FALSE
 /datum/job/var/absolute_limit = FALSE // if this is FALSE it's ignored
+/datum/job/var/rank_abbreviation = null
 
 /* type_flag() replaces flag, and base_type_flag() replaces department_flag
  * this is a better solution than bit constants, in my opinion */
@@ -275,6 +276,7 @@
 	if (gave_radio)
 		return
 
+
 	gave_radio = TRUE
 
 	spawn (1)
@@ -285,9 +287,21 @@
 
 		spawn (0)
 			if (istype(original_job, /datum/job/soviet))
-				equip_to_slot_or_del(new /obj/item/device/radio/rbs(src), slot_s_store)
+				if (original_job.is_officer)
+					equip_to_slot_or_del(new /obj/item/device/radio/rbs/command(src), slot_s_store)
+				else
+					equip_to_slot_or_del(new /obj/item/device/radio/rbs(src), slot_s_store)
 			else if (istype(original_job, /datum/job/german))
-				equip_to_slot_or_del(new /obj/item/device/radio/feldfu(src), slot_s_store)
+				if (original_job.is_SS)
+					if (original_job.is_officer)
+						equip_to_slot_or_del(new /obj/item/device/radio/feldfu/SS/command(src), slot_s_store)
+					else
+						equip_to_slot_or_del(new /obj/item/device/radio/feldfu/SS(src), slot_s_store)
+				else
+					if (original_job.is_officer)
+						equip_to_slot_or_del(new /obj/item/device/radio/feldfu/command(src), slot_s_store)
+					else
+						equip_to_slot_or_del(new /obj/item/device/radio/feldfu(src), slot_s_store)
 			else if (istype(original_job, /datum/job/partisan))
 				equip_to_slot_or_del(new /obj/item/device/radio/partisan(src), slot_s_store)
 

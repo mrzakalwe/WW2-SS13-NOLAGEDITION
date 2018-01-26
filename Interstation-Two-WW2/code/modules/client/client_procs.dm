@@ -2,7 +2,8 @@
 	//SECURITY//
 	////////////
 #define UPLOAD_LIMIT		10485760	//Restricts client uploads to the server to 10MB //Boosted this thing. What's the worst that can happen?
-#define MIN_CLIENT_VERSION	509		//Just an ambiguously low version for now, I don't want to suddenly stop people playing.
+#define ABSOLUTE_MIN_CLIENT_VERSION 400		//Just an ambiguously low version for now, I don't want to suddenly stop people playing.
+#define REAL_MIN_CLIENT_VERSION 512 // I DO - kachnov
 									//I would just like the code ready should it ever need to be used.
 	/*
 	When somebody clicks a link in game, this Topic is called first.
@@ -111,7 +112,7 @@
 
 	if(!(connection in list("seeker", "web")))					//Invalid connection type.
 		return null
-	if(byond_version < MIN_CLIENT_VERSION)		//Out of date client.
+	if(byond_version < ABSOLUTE_MIN_CLIENT_VERSION)		// seriously out of date client.
 		return null
 
 	if (key != world.host)
@@ -140,6 +141,7 @@
 
 	. = ..()	//calls mob.Login()
 
+
 	if(!serverswap_open_status)
 		if (serverswap.Find("snext"))
 			var/linked = "byond://[world.internet_address]:[serverswap[serverswap["snext"]]]"
@@ -151,6 +153,14 @@
 	if (quickBan_rejected("Server"))
 		del(src)
 		return FALSE
+
+	if(byond_version < REAL_MIN_CLIENT_VERSION)		//Out of date client.
+		src << "<span class = 'danger'><font size = 4>Please upgrade to BYOND [REAL_MIN_CLIENT_VERSION] to play.</font></span>"
+		del(src)
+		return FALSE
+
+	if (config.resource_website)
+		preload_rsc = config.resource_website
 
 	src << "\red If the title screen is black, resources are still downloading. Please be patient until the title screen appears."
 
@@ -371,7 +381,16 @@
 		'html/images/loading.gif',
 		'html/images/ntlogo.png',
 		'html/images/talisman.png',
-		'nano/templates/chem_disp.tmpl'
+		'UI/templates/appearance_changer_WW13.tmpl',
+		'UI/templates/chem_disp_WW13.tmpl',
+		'UI/templates/freezer_WW13.tmpl',
+		'UI/templates/layout_basic_WW13.tmpl',
+		'UI/templates/layout_default_WW13.tmpl',
+		'UI/templates/nav_WW13.tmpl',
+		'UI/templates/news_browser_WW13.tmpl',
+		'UI/templates/radio_WW13.tmpl',
+		'UI/templates/smartfridge_WW13.tmpl',
+		'UI/templates/vending_machine_WW13.tmpl'
 		)
 
 	spawn (10) //removing this spawn causes all clients to not get verbs.

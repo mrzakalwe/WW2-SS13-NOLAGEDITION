@@ -23,9 +23,14 @@
 	H.equip_to_slot_or_del(new /obj/item/clothing/shoes/swat(H), slot_shoes)
 	H.equip_to_slot_or_del(new /obj/item/clothing/under/geruni/gerofficer(H), slot_w_uniform)
 	H.equip_to_slot_or_del(new /obj/item/clothing/head/caphat/gerofficercap(H), slot_head)
-	H.equip_to_slot_or_del(new /obj/item/weapon/gun/projectile/pistol/luger(H), slot_belt)
+	if (istype(H, /mob/living/carbon/human/mechahitler))
+		H.equip_to_slot_or_del(new /obj/item/weapon/gun/projectile/pistol/luger/gibber(H), slot_belt)
+	else
+		H.equip_to_slot_or_del(new /obj/item/weapon/gun/projectile/pistol/luger(H), slot_belt)
 	H.equip_to_slot_or_del(new /obj/item/weapon/attachment/scope/adjustable/binoculars(H), slot_l_hand)
-	world << "<b><big>[H.client.prefs.german_name] is the [title] of the German forces!</big></b>"
+	spawn (5) // after we have our name
+		if (!istype(H, /mob/living/carbon/human/mechahitler))
+			world << "<b><big>[H.real_name] is the [title] of the German forces!</big></b>"
 	H << "<span class = 'notice'>You are the <b>[title]</b>, the highest ranking officer present. Your job is the organize the German forces and lead them to victory, while working alongside the <b>SS-Untersharffuhrer</b>. You take orders from the <b>German High Command</b>.</span>"
 	H.give_radio()
 	H.setStat("strength", STAT_MEDIUM_LOW)
@@ -138,6 +143,7 @@
 	additional_languages = list( "Russian" = 33 )
 	is_officer = TRUE
 	is_squad_leader = TRUE
+	SL_check_independent = TRUE
 
 /datum/job/german/squad_leader/equip(var/mob/living/carbon/human/H)
 	if(!H)	return FALSE
@@ -203,11 +209,12 @@
 /datum/job/german/doctor
 	title = "Medizinier"
 	en_meaning = "Doctor"
-	total_positions = 3
+	total_positions = 5
 	selection_color = "#4c4ca5"
 	spawn_location = "JoinLateHeerDr"
 	is_nonmilitary = TRUE
 	additional_languages = list( "Russian" = 100, "Ukrainian" = 50 )
+	SL_check_independent = TRUE
 
 /datum/job/german/doctor/equip(var/mob/living/carbon/human/H)
 	if(!H)	return FALSE
@@ -232,7 +239,7 @@
 	return TRUE
 
 /datum/job/german/doctor/get_keys()
-	return list(new/obj/item/weapon/key/german, new/obj/item/weapon/key/german/medic, new/obj/item/weapon/key/german/command_intermediate)
+	return list(new/obj/item/weapon/key/german, new/obj/item/weapon/key/german/medic)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -279,7 +286,7 @@
 /datum/job/german/sniper
 	title = "Sharfshutze"
 	en_meaning = "Sniper"
-	total_positions = 3
+	total_positions = 5
 	selection_color = "#4c4ca5"
 	spawn_location = "JoinLateHeer"
 	is_primary = FALSE
@@ -550,7 +557,7 @@ var/first_fallschirm = TRUE
 	spawn_location = "Fallschirm"
 	additional_languages = list( "Russian" = 100, "Ukrainian" = 100 )
 	spawn_delay = 3000
-	delayed_spawn_message = "<span class = 'danger'><big>You are parachuting behind Russian lines. You won't spawn until 5 minutes.</big></span>"
+	delayed_spawn_message = "<span class = 'danger'><big>You are parachuting behind Russian lines. You won't spawn for 5 minutes.</big></span>"
 	is_paratrooper = TRUE
 	var/fallschirm_spawnzone = null
 	var/list/fallschirm_spawnpoints = list()
@@ -623,6 +630,7 @@ var/first_fallschirm = TRUE
 	additional_languages = list( "Russian" = 100 )
 	is_officer = TRUE
 	absolute_limit = TRUE
+	SL_check_independent = TRUE
 
 /datum/job/german/QM/equip(var/mob/living/carbon/human/H)
 	if(!H)	return FALSE
@@ -746,6 +754,7 @@ var/first_fallschirm = TRUE
 	spawn_location = "JoinLateHeerSO"
 	is_officer = TRUE
 	absolute_limit = TRUE
+	SL_check_independent = TRUE
 
 /datum/job/german/conductor/train_check() // if there's no train, don't let people be conductors!
 	return WW2_train_check()
@@ -785,6 +794,7 @@ var/first_fallschirm = TRUE
 	is_officer = TRUE
 	is_commander = TRUE // not a squad leader despite the title
 	is_petty_commander = TRUE
+	SL_check_independent = TRUE
 
 /datum/job/german/squad_leader_ss/equip(var/mob/living/carbon/human/H)
 	if(!H)	return FALSE
@@ -835,6 +845,7 @@ var/first_fallschirm = TRUE
 	selection_color = "#4c4ca5"
 	spawn_location = "JoinLateSS"
 	is_SS = TRUE
+	SL_check_independent = TRUE
 
 /datum/job/german/soldier_ss/equip(var/mob/living/carbon/human/H)
 	if(!H)	return FALSE

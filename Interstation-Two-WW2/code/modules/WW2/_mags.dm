@@ -76,7 +76,7 @@ WW 2 WEAPONS MAGS N AMMO
 	w_class = 4
 	matter = list(DEFAULT_WALL_MATERIAL = 4500)
 	ammo_type = /obj/item/ammo_casing/a762x54
-	max_ammo = 100
+	max_ammo = 250
 	multiple_sprites = TRUE
 	var/slot = "decor"
 	var/obj/item/clothing/under/has_suit = null		//the suit the tie may be attached to
@@ -132,8 +132,8 @@ WW 2 WEAPONS MAGS N AMMO
 //	origin_tech = "combat=2"
 	mag_type = MAGAZINE
 	matter = list(DEFAULT_WALL_MATERIAL = 600)
-	caliber = "a9mm_para"
-	ammo_type = /obj/item/ammo_casing/a9_parabellum
+	caliber = "a9mm_para_luger"
+	ammo_type = /obj/item/ammo_casing/a9_parabellum_luger
 	max_ammo = 8
 	multiple_sprites = TRUE
 

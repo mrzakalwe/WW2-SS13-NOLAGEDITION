@@ -9,13 +9,10 @@ var/list/admin_verbs_default = list(
 	/client/proc/hide_most_verbs,		//hides all our hideable adminverbs,
 	/client/proc/debug_variables,		//allows us to -see- the variables of any instance in the game. +VAREDIT needed to modify,
 	/client/proc/cmd_mentor_check_new_players,
-//	/client/proc/see_spies,
-//	/client/proc/see_jews,
 	/client/proc/see_soldiers,
 	/client/proc/see_bug_reports,
 	/client/proc/see_suggestions,
 	/client/proc/see_world_realtime
-//	/client/proc/deadchat				//toggles deadchat on/off,
 	)
 var/list/admin_verbs_admin = list(
 	/client/proc/add_to_server_whitelist,
@@ -35,7 +32,6 @@ var/list/admin_verbs_admin = list(
 	/client/proc/admin_ghost,			//allows us to ghost/reenter body at will,
 	/client/proc/toggle_view_range,		//changes how far we can see,
 	/datum/admins/proc/view_txt_log,	//shows the server log (diary) for today,
-	/datum/admins/proc/view_atk_log,	//shows the server combat-log, doesn't do anything presently,
 	/client/proc/cmd_admin_pm_context,	//right-click adminPM interface,
 	/client/proc/cmd_admin_pm_panel,	//admin-pm list,
 	/client/proc/cmd_admin_subtle_message,	//send an message to somebody as a 'voice in their head',
@@ -83,7 +79,8 @@ var/list/admin_verbs_admin = list(
 	/client/proc/removeHalfEmptyCases,
 	/client/proc/removeAllBlood,
 	/client/proc/toggle_jobs,
-	/client/proc/toggle_subfactions
+	/client/proc/toggle_factions,
+	/client/proc/forcibly_enable_faction
 
 )
 var/list/admin_verbs_ban = list(
@@ -208,7 +205,6 @@ var/list/admin_verbs_hideable = list(
 	/client/proc/admin_ghost,
 	/client/proc/toggle_view_range,
 	/datum/admins/proc/view_txt_log,
-	/datum/admins/proc/view_atk_log,
 	/client/proc/cmd_admin_subtle_message,
 	/client/proc/cmd_admin_check_contents,
 	/client/proc/admin_call_shuttle,
@@ -316,7 +312,8 @@ var/list/admin_verbs_host = list(
 	/client/proc/remove_patreon_rewards,
 	/client/proc/toggle_BYOND_hub_visibility,
 	/client/proc/eject_unwhitelisted,
-	/client/proc/toggle_hyperefficiency_mode
+	/client/proc/toggle_hyperefficiency_mode,
+	/client/proc/toggle_playing
 )
 
 /client/proc/add_admin_verbs()
