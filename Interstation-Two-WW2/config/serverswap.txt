@@ -1,5 +1,5 @@
-enabled = true
-masterdir = /home/kachnov/WW13
+enabled = false
+masterdir = nil
 s1 = 2052
 s2 = 2053
 sfinal = s2
