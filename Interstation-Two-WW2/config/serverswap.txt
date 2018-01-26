@@ -1,6 +1,6 @@
 enabled = true
-masterdir = /home/kachnov/WW13
-s1 = 2052
+masterdir = /opt/WW2-SS13-NOLAGEDITION/Interstation-Two-WW2
+s1 = 2053
 s2 = 2053
 sfinal = s2
 this = s1
